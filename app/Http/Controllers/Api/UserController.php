@@ -10,6 +10,10 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    public function __construct(){
+        $this->middleware('role:patient');
+    }
+    
     /**
      * Display a listing of the resource.
      */
@@ -90,7 +94,9 @@ class UserController extends Controller
      */
     public function me(Request $request)
     {
-        return new UserResource($request->user());
+        return response()->json([
+            "data" => new UserResource($request->user())
+        ]);
     }
 
     /**
@@ -181,8 +187,8 @@ class UserController extends Controller
     public function logout(Request $request)
     {
         $user = $request->user();
-        
         $user->tokens()->delete();
+        
         return response()->json([
             "message" => "Logged out successfully"
         ]);

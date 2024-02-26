@@ -5,10 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CaregiverResource;
 use App\Models\Caregiver;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class CaregiverController extends Controller
 {
+    public function __construct(){
+        $this->middleware('role:caregiver');
+    }
+
+    // ============================= Caregiver =============================
+    // Get all caregivers
     public function index()
     {
         return CaregiverResource::collection(Caregiver::all());
@@ -18,7 +25,6 @@ class CaregiverController extends Controller
     {
         // Check if user is already logged in
         // TODO
-
 
         // Register Caregiver
         $request->validate([
@@ -81,9 +87,11 @@ class CaregiverController extends Controller
             $request->user()->load('patients');
 
         return response()->json([
-            "data" => new CaregiverResource($request->user()->paginate(4))
+            "data" => new CaregiverResource($request->user())
         ]);
     }
+
+    // ============================= Relationships =============================
 
     // Get all patients which caregiver is following
     public function patients(Request $request)
@@ -154,6 +162,67 @@ class CaregiverController extends Controller
 
         return response()->json([
             "data" => $contact
+        ]);
+    }
+
+    // Get all falls for a specific patient
+    public function falls(Request $request, $id)
+    {
+        $patient = $request->user()->patients()->find($id);
+
+        if (!$patient) {
+            return response()->json([
+                "errors" => [
+                    "message" => "Patient not found"
+                ]
+            ], 404);
+        }
+
+        return response()->json([
+            "data" => $patient->falls()->orderBy('created_at', 'desc')->get()
+        ]);
+    }
+
+
+    // ============================= Follow System =============================
+    // Follow System
+    public function follow(Request $request, $id)
+    {
+        $patient = User::find($id);
+
+        if (!$patient) {
+            return response()->json([
+                "errors" => [
+                    "message" => "Patient not found"
+                ]
+            ], 404);
+        }
+
+        $request->user()->patients()->attach($patient);
+
+        return response()->json([
+            "message" => "Patient followed successfully"
+        ]);
+    }
+
+
+    // Unfollow System
+    public function unfollow(Request $request, $id)
+    {
+        $patient = User::find($id);
+
+        if (!$patient) {
+            return response()->json([
+                "errors" => [
+                    "message" => "Patient not found"
+                ]
+            ], 404);
+        }
+
+        $request->user()->patients()->detach($patient);
+
+        return response()->json([
+            "message" => "Patient unfollowed successfully"
         ]);
     }
 }

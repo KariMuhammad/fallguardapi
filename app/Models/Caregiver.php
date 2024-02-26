@@ -20,6 +20,7 @@ class Caregiver extends Authenticatable
     protected $hidden = [
         "password",
         "remember_token",
+        "role",
     ];
 
     /**

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\EmergencyContactController;
 use App\Http\Controllers\Api\FallController;
 
+use App\Http\Resources\User\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,7 +17,27 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-// Auth routes
+
+// Shared Routes
+Route::middleware(['auth:sanctum', 'role.detector'])->group(function () {
+
+
+    Route::prefix('me')->group(function () {
+        Route::get('/', function (Request $request) {
+            return response()->json([
+                "data" => new UserResource($request->user())
+            ]);
+        });
+
+
+        Route::post('logout', function (Request $request) {
+            $request->user()->tokens()->delete();
+            return response()->json([
+                "message" => "Logged out"
+            ]);
+        });
+    });
+});
 
 // Patients
 Route::prefix('patients')->group(function () {
@@ -44,9 +65,10 @@ Route::prefix('patients')->group(function () {
             ]); // Get all falls for a user
         });
 
-        
-        Route::post('logout', [App\Http\Controllers\Api\UserController::class, 'logout']); // Logout a user
-        Route::get('me', [App\Http\Controllers\Api\UserController::class, 'me']); // Get the current user
+        Route::prefix('me')->group(function() {
+            Route::get('/', [App\Http\Controllers\Api\UserController::class, 'me']); // Get the current user
+            Route::post('logout', [App\Http\Controllers\Api\UserController::class, 'logout']); // Logout a user
+        });
     });
 });
 
@@ -55,12 +77,12 @@ Route::prefix('caregivers')->group(function () {
     Route::post('register', [App\Http\Controllers\Api\CaregiverController::class, 'register']);
     Route::post('login', [App\Http\Controllers\Api\CaregiverController::class, 'login']);
     
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum', 'role.detector'])->group(function () {
         Route::get('/', [App\Http\Controllers\Api\CaregiverController::class, 'index']);
-        Route::post('logout', [App\Http\Controllers\Api\CaregiverController::class, 'logout']);
-
+        
         Route::prefix('me')->group(function () {
             Route::get('/', [App\Http\Controllers\Api\CaregiverController::class, 'me']);
+            Route::post('logout', [App\Http\Controllers\Api\CaregiverController::class, 'logout']);
             
             Route::get('patients', [App\Http\Controllers\Api\CaregiverController::class, 'patients']);
             Route::get('patients/{id}', [App\Http\Controllers\Api\CaregiverController::class, 'patient']);
@@ -73,9 +95,16 @@ Route::prefix('caregivers')->group(function () {
     });
 });
 
+// Follow-ups
+// Caregiver can follow many patients, but patients cannot follow anyone
+Route::middleware(["auth:sanctum", 'role.detector'])->prefix("me")->group(function () {
+    Route::post('follow/{id}', [App\Http\Controllers\Api\CaregiverController::class, 'follow']);
+    Route::post('unfollow/{id}', [App\Http\Controllers\Api\CaregiverController::class, 'unfollow']);
+});
+
 
 // Emergency contacts
-Route::middleware(["auth:sanctum"])->group(function () {
+Route::middleware(["auth:sanctum", 'role.detector'])->group(function () {
     // Emergency Contacts
     Route::apiResource('emergency-contacts', EmergencyContactController::class);
     // Falls
