@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 class FallController extends Controller
 {
     public function __construct(){
-        $this->middleware('role:patient');
+        $this->middleware('role:patient', ['except' => ['index', 'show', "user"]]);
     }
     /**
      * Display a listing of the resource.

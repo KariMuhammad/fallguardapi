@@ -11,7 +11,9 @@ use Illuminate\Http\Request;
 class UserController extends Controller
 {
     public function __construct(){
-        $this->middleware('role:patient');
+        $this->middleware('role:patient', [
+            'only' => ['me', 'update']
+        ]);
     }
     
     /**
@@ -58,7 +60,7 @@ class UserController extends Controller
     public function login(Request $request) {
 
         // Check if user is already logged in
-        if ($request->hasCookie('token')) {
+        if ($request->hasCookie('token') && $request->role === "patient") {
             return response()->json([
                 "errors" => [
                     "message" => "User already logged in"

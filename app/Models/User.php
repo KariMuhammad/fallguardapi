@@ -58,6 +58,10 @@ class User extends Authenticatable
         return $this->belongsToMany(Caregiver::class);
     }
 
+    public function getRoleAttribute() {
+        return "patient";
+    }
+
     // Get All Notifications which belongs to the user
     // public function notifications() {
     //     return $this->hasMany(Notification::class);

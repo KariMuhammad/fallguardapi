@@ -49,4 +49,8 @@ class Caregiver extends Authenticatable
          * > caregiver_id, user_id
          */
     }
+
+    public function getRoleAttribute() {
+        return "caregiver";
+    }
 }

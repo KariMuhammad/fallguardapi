@@ -16,7 +16,7 @@ class CheckRoleMiddleware
     public function handle(Request $request, Closure $next, $role): Response
     {
         // Check if role of current user as passed in the request
-        if ($request->user()->role !== $role) {
+        if ($request->role !== $role) {
             return response()->json([
                 "errors" => [
                     "message" => "Your role not unauthorized to do actions on this endpoint!",

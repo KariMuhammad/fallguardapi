@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Shared Routes
-Route::middleware(['auth:sanctum', 'role.detector'])->group(function () {
+Route::middleware(['auth:sanctum', 'check.role'])->group(function () {
 
 
     Route::prefix('me')->group(function () {
@@ -77,7 +77,7 @@ Route::prefix('caregivers')->group(function () {
     Route::post('register', [App\Http\Controllers\Api\CaregiverController::class, 'register']);
     Route::post('login', [App\Http\Controllers\Api\CaregiverController::class, 'login']);
     
-    Route::middleware(['auth:sanctum', 'role.detector'])->group(function () {
+    Route::middleware(['auth:sanctum', 'check.role'])->group(function () {
         Route::get('/', [App\Http\Controllers\Api\CaregiverController::class, 'index']);
         
         Route::prefix('me')->group(function () {
@@ -97,14 +97,14 @@ Route::prefix('caregivers')->group(function () {
 
 // Follow-ups
 // Caregiver can follow many patients, but patients cannot follow anyone
-Route::middleware(["auth:sanctum", 'role.detector'])->prefix("me")->group(function () {
+Route::middleware(["auth:sanctum", 'check.role'])->prefix("me")->group(function () {
     Route::post('follow/{id}', [App\Http\Controllers\Api\CaregiverController::class, 'follow']);
     Route::post('unfollow/{id}', [App\Http\Controllers\Api\CaregiverController::class, 'unfollow']);
 });
 
 
 // Emergency contacts
-Route::middleware(["auth:sanctum", 'role.detector'])->group(function () {
+Route::middleware(["auth:sanctum", 'check.role'])->group(function () {
     // Emergency Contacts
     Route::apiResource('emergency-contacts', EmergencyContactController::class);
     // Falls

@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 class CaregiverController extends Controller
 {
     public function __construct(){
-        $this->middleware('role:caregiver');
+        $this->middleware('role:caregiver', ['except' => ['register', 'login']]);
     }
 
     // ============================= Caregiver =============================

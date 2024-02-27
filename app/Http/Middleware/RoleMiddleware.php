@@ -24,7 +24,8 @@ class RoleMiddleware
             $role = "caregiver";
         }
 
-        $request->user()->role = $role;
+        // Not Allowed to add role not exist in model
+        // $request->user()->role = $role;
 
         $request->merge([
             "role" => $role
