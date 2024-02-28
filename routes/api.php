@@ -24,6 +24,12 @@ Route::middleware(['auth:sanctum', 'check.role'])->group(function () {
 
     Route::prefix('me')->group(function () {
         Route::get('/', function (Request $request) {
+            if ($request->query('deep') == 'true') {
+                if ($request->user()->role == "caregiver") {
+                    $request->user()->load('patients', 'patients.contacts', 'patients.falls');
+                }
+            }
+            
             return response()->json([
                 "data" => new UserResource($request->user())
             ]);

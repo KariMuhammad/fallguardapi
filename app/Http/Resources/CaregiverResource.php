@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\User\UserCollection;
+use App\Http\Resources\User\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -25,6 +27,10 @@ class CaregiverResource extends JsonResource
             "country" => $this->country,
             "address" => $this->address,
             "photo" => $this->photo,
+            "gender" => $this->gender,
+            "rating" => $this->rating,
+            // when deep query exists, we load the patients and their contacts and falls
+            "patients" => UserResource::collection($this->whenLoaded('patients')),
         ];
     }
 }

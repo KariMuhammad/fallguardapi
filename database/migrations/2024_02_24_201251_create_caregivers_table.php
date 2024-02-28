@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('photo')->nullable();
+            $table->date('date_of_birth')->nullable();
 
             $table->string("phone");
             
@@ -27,7 +28,6 @@ return new class extends Migration
             $table->string("country")->nullable();
             $table->string("address")->nullable();
 
-            $table->date('date_of_birth');
             
             $table->integer('rating')->default(0); // 0-5 - caregiver helpful
 

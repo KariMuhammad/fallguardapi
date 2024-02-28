@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CaregiverResource;
 use App\Models\Caregiver;
 use App\Models\User;
+use App\Rules\GenderValidateRule;
 use Illuminate\Http\Request;
 
 class CaregiverController extends Controller
@@ -28,11 +29,13 @@ class CaregiverController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:caregivers,email',
-            'password' => 'required|string|confirmed|min:8',
-            "date_of_birth" => "required|date",
+            // checks if the password contains at least one lowercase letter, one uppercase letter, and one number
+            'password' => 'required|string|big_password|min:8',
+            "date_of_birth" => "sometimes|required|date",
             'phone' => 'required|string|regex:/^01[0-2]{1}[0-9]{8}$/',
-            "country" => "required|string|max:255",
-            'address' => 'required|string|max:255',
+            "gender" => ["required", new GenderValidateRule],
+            "country" => "sometimes|required|string|max:255",
+            'address' => 'sometimes|required|string|max:255',
             'photo' => 'sometimes|required|file|max:255',
         ]);
 
