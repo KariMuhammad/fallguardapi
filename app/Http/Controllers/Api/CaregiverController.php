@@ -11,7 +11,8 @@ use Illuminate\Http\Request;
 class CaregiverController extends Controller
 {
     public function __construct(){
-        $this->middleware('role:caregiver', ['except' => ['register', 'login']]);
+        $this->middleware('role:caregiver', ['except' => ['register', 'login']]);    
+        $this->middleware('check.token:Caregiver', ['only' => ['register', 'login']]);
     }
 
     // ============================= Caregiver =============================
@@ -23,22 +24,13 @@ class CaregiverController extends Controller
 
     public function register(Request $request)
     {
-        // Check if user is already logged in
-        if ($request->user()) {
-            return response()->json([
-                "errors" => [
-                    'message' => 'User already logged in'
-                ]
-            ], 400);
-        }
-
         // Register Caregiver
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:caregivers,email',
             'password' => 'required|string|confirmed|min:8',
             "date_of_birth" => "required|date",
-            'phone' => 'required|string|max:255',
+            'phone' => 'required|string|regex:/^01[0-2]{1}[0-9]{8}$/',
             "country" => "required|string|max:255",
             'address' => 'required|string|max:255',
             'photo' => 'sometimes|required|file|max:255',
@@ -50,16 +42,6 @@ class CaregiverController extends Controller
     }
 
     public function login(Request $request) {
-
-        // Check if user is already logged in
-        if ($request->user()) {
-            return response()->json([
-                "errors" => [
-                    'message' => 'User already logged in'
-                ]
-            ], 400);
-        }
-
         // Login Caregiver
         $request->validate([
             'email' => 'required|email',
@@ -209,6 +191,14 @@ class CaregiverController extends Controller
                 ]
             ], 404);
         }
+        // Check if Caregiver already following the patient
+        if ($request->user()->patients()->find($id)) {
+            return response()->json([
+                "errors" => [
+                    "message" => "Caregiver already following the patient"
+                ]
+            ], 400);
+        }
 
         $request->user()->patients()->attach($patient);
 
@@ -231,6 +221,15 @@ class CaregiverController extends Controller
             ], 404);
         }
 
+        // Check if Caregiver already unfollowing the patient
+        if(!$request->user()->patients()->find($id)) {
+            return response()->json([
+                "errors" => [
+                    "message" => "Caregiver already unfollowing the patient"
+                ]
+            ], 400);
+        }
+            
         $request->user()->patients()->detach($patient);
 
         return response()->json([

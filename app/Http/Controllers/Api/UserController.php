@@ -14,6 +14,10 @@ class UserController extends Controller
         $this->middleware('role:patient', [
             'only' => ['me', 'update']
         ]);
+
+        $this->middleware('check.token:Patient', [
+            'only' => ['register', 'login']
+        ]);
     }
     
     /**
@@ -29,16 +33,6 @@ class UserController extends Controller
      */
     public function register(Request $request)
     {
-
-        // Check if user is already logged in
-        if ($request->hasCookie('token')) {
-            return response()->json([
-                "errors" => [
-                    "message" => "User already logged in"
-                ]
-            ], 422);
-        }
-
         // Register User
         $request->validate([
             'name' => 'required|string|max:255',
@@ -46,7 +40,7 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|confirmed|min:8',
             "date_of_birth" => "required|date",
-            'phone' => 'required|string|max:255',
+            'phone' => 'required|string|regex:/^01[0-2]{1}[0-9]{8}$/',
             "country" => "required|string|max:255",
             'address' => 'required|string|max:255',
             'photo' => 'sometimes|required|file|max:255',
@@ -58,16 +52,6 @@ class UserController extends Controller
     }
 
     public function login(Request $request) {
-
-        // Check if user is already logged in
-        if ($request->hasCookie('token') && $request->role === "patient") {
-            return response()->json([
-                "errors" => [
-                    "message" => "User already logged in"
-                ]
-            ], 422);
-        }
-
         // Login User
         $request->validate([
             'email' => 'required|email',
