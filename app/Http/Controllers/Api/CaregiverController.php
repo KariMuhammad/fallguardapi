@@ -24,7 +24,13 @@ class CaregiverController extends Controller
     public function register(Request $request)
     {
         // Check if user is already logged in
-        // TODO
+        if ($request->user()) {
+            return response()->json([
+                "errors" => [
+                    'message' => 'User already logged in'
+                ]
+            ], 400);
+        }
 
         // Register Caregiver
         $request->validate([
@@ -46,7 +52,13 @@ class CaregiverController extends Controller
     public function login(Request $request) {
 
         // Check if user is already logged in
-        // TODO
+        if ($request->user()) {
+            return response()->json([
+                "errors" => [
+                    'message' => 'User already logged in'
+                ]
+            ], 400);
+        }
 
         // Login Caregiver
         $request->validate([

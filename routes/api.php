@@ -33,7 +33,8 @@ Route::middleware(['auth:sanctum', 'check.role'])->group(function () {
         Route::post('logout', function (Request $request) {
             $request->user()->tokens()->delete();
             return response()->json([
-                "message" => "Logged out"
+                "data" => "Logged out successfully!",
+                "message" => "Logged out successfully!"
             ]);
         });
     });
