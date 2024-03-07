@@ -7,6 +7,7 @@ use App\Http\Resources\CaregiverResource;
 use App\Models\Caregiver;
 use App\Models\User;
 use App\Rules\GenderValidateRule;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\Request;
 
 class CaregiverController extends Controller
@@ -26,7 +27,7 @@ class CaregiverController extends Controller
     public function register(Request $request)
     {
         // Register Caregiver
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:caregivers,email',
             // checks if the password contains at least one lowercase letter, one uppercase letter, and one number
@@ -39,7 +40,13 @@ class CaregiverController extends Controller
             'photo' => 'sometimes|required|file|max:255',
         ]);
 
-        $caregiver = Caregiver::create($request->all());
+        // $uploadedFileUrl = Cloudinary::upload($request->file('file')->getRealPath())->getSecurePath();
+        $caregiver = Caregiver::make($request->except('photo'));
+
+        if ($request->hasFile('photo')) {
+            $imageUrl = Cloudinary::upload($request->file('photo')->getRealPath())->getSecurePath();
+            $caregiver->photo = $imageUrl;
+        }
 
         return response()->json(new CaregiverResource($caregiver), 201);
     }
@@ -85,6 +92,35 @@ class CaregiverController extends Controller
 
         return response()->json([
             "data" => new CaregiverResource($request->user())
+        ]);
+    }
+
+    public function update(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|email|unique:caregivers,email,' . $request->user()->id,
+            'password' => 'sometimes|required|string|big_password|min:8',
+            "date_of_birth" => "sometimes|required|date",
+            'phone' => 'sometimes|required|string|regex:/^01[0-2]{1}[0-9]{8}$/',
+            "photo" => "sometimes|required|file"
+        ]);
+
+        $caregiver = $request->user();
+
+        $caregiver->fill($request->except('photo'));
+
+        if ($request->hasFile('photo')) {
+            // First delete the old photo from cloudinary
+            Cloudinary::destroy($caregiver->photo);
+            $imageUrl = Cloudinary::upload($request->file('photo')->getRealPath())->getSecurePath();
+            $caregiver->photo = $imageUrl;
+        }
+
+        $caregiver->save();
+
+        return response()->json([
+            "data" => new CaregiverResource($caregiver)
         ]);
     }
 
