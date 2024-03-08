@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Http\Resources\Caregiver\CaregiverResource;
+use App\Http\Resources\CaregiverResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -52,5 +54,9 @@ class Caregiver extends Authenticatable
 
     public function getRoleAttribute() {
         return "caregiver";
+    }
+
+    public function toArray() {
+        return new CaregiverResource($this);
     }
 }
