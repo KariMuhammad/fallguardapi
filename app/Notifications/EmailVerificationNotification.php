@@ -18,7 +18,6 @@ class EmailVerificationNotification extends Notification
      */
     public function __construct()
     {
-        //
         $this->otp = new Otp();
     }
 
@@ -39,22 +38,16 @@ class EmailVerificationNotification extends Notification
     {
         $otp = $this->otp->generate($notifiable->email, "numeric", 6, 10);
         return (new MailMessage)
-                    // ->subject("Verify Email Address")
-                    // ->greeting("Hi {{$notifiable->name}}")
-                    // ->line("Please use the following code to verify your email address: " . $otp->token)
-                    // // ->action('Verify Email Address', url('/verify-email', ['token' => $otp->token, 'email' => $notifiable->email]))
-                    // ->line('Thank you for using our application!');
                     ->view('vendor.notifications.email', [
                         'otp' => $otp->token, 
                         'user' => $notifiable, 
                         // "introLines" => ["Please use the following code to verify your email address: "],
+                        // "outroLines" => ["Thank you for using our application!"],
                         // "actionText" => "Verify Email Address",
                         // "actionUrl" => url('/verify-email', ['token' => $otp->token, 'email' => $notifiable->email]),
-                        // "outroLines" => ["Thank you for using our application!"],
                         "logo" => "https://res.cloudinary.com/dpr9selqa/image/upload/v1709916877/ivf95hxdxfiov8ykmvqt.png",
                     ]);
 
-        // response()->json(['message' => 'Email sent successfully'], 200);
     }
 
     /**

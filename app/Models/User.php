@@ -71,4 +71,19 @@ class User extends Authenticatable
     public function toArray() {
         return new UserResource($this);
     }
+
+    // The Validators for the User
+    public static function validators() {
+        return [
+            'name' => 'required|string|max:255',
+            "family_name" => "required|string|max:255",
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|confirmed|min:8',
+            "date_of_birth" => "required|date",
+            'phone' => 'required|string|regex:/^01[0-2]{1}[0-9]{8}$/',
+            "country" => "required|string|max:255",
+            'address' => 'required|string|max:255',
+            'photo' => 'sometimes|required|file|max:255',
+        ];
+    }
 }

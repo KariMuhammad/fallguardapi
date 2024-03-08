@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contracts\AuthenticationInterface;
 use App\Notifications\EmailVerificationNotification;
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Http\Request;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -13,12 +14,13 @@ use Illuminate\Support\Facades\DB;
 class AuthService implements AuthenticationInterface {
     private $user;
 
+    // TODO: prefered to accept the class name as a string
     public function __construct(Authenticatable $user) {
         $this->user = $user;
     }
 
     public function register(Request $request) {
-        $request->validate($this->user->fillable);
+        $request->validate($this->user->validators());
 
         // $uploadedFileUrl = Cloudinary::upload($request->file('file')->getRealPath())->getSecurePath();
         $User = $this->user::make($request->except('photo'));
@@ -32,10 +34,10 @@ class AuthService implements AuthenticationInterface {
         // $caregiver->save();
 
         // Notify the caregiver to verify their email
-        $User->notify(new EmailVerificationNotification());
-
+        // $User->notify(new EmailVerificationNotification());
+        // return response()->json("Registered successfully. Please verify your email.", 201);
         $data = $User->toArray();
-
+        
         return response()->json([
             "message" => "{$this->user->role} registered successfully. Please verify your email.",
             "data" => $data
@@ -46,7 +48,7 @@ class AuthService implements AuthenticationInterface {
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
-            "device_name" => "sometimes|required|string"
+            "device_name" => "string"
         ]);
 
         // Check if the caregiver exists
@@ -103,7 +105,7 @@ class AuthService implements AuthenticationInterface {
         ]);
     }
 
-    public function forgotPassword($request) {
+    public function forgotPassword(Request $request) {
         $User = $this->user;
         $UserTable = $User->getTable();
 
@@ -119,7 +121,7 @@ class AuthService implements AuthenticationInterface {
         ]);
     }
 
-    public function resetPassword($request) {
+    public function resetPassword(Request $request) {
         $User = $this->user;
         $UserTable = $User->getTable();
 
@@ -140,7 +142,7 @@ class AuthService implements AuthenticationInterface {
         ]);
     }
 
-    public function logout($request) {
+    public function logout(Request $request) {
         $request->user()->tokens()->delete();
 
         return response()->json([

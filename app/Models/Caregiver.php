@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use App\Http\Resources\Caregiver\CaregiverResource;
+// use App\Http\Resources\Caregiver\CaregiverResource;
 use App\Http\Resources\CaregiverResource;
+use App\Rules\GenderValidateRule;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -58,5 +59,21 @@ class Caregiver extends Authenticatable
 
     public function toArray() {
         return new CaregiverResource($this);
+    }
+
+    // The Validators for the Caregiver
+    public static function validators() {
+        return [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:caregivers,email',
+            // checks if the password contains at least one lowercase letter, one uppercase letter, and one number
+            'password' => 'required|string|big_password|min:8',
+            "date_of_birth" => "sometimes|required|date",
+            'phone' => 'required|string|regex:/^01[0-2]{1}[0-9]{8}$/',
+            "gender" => ["required", new GenderValidateRule],
+            "country" => "sometimes|required|string|max:255",
+            'address' => 'sometimes|required|string|max:255',
+            'photo' => 'sometimes|required|file|max:255',
+        ];
     }
 }
