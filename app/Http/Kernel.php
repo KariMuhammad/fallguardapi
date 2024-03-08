@@ -42,8 +42,6 @@ class Kernel extends HttpKernel
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            // Custom
-            \App\Http\Middleware\CheckAcceptHeader::class,
         ],
     ];
 
@@ -67,6 +65,7 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         // Custom
+        "check.accept" => \App\Http\Middleware\CheckAcceptHeader::class,
         "check.token" => \App\Http\Middleware\CheckTokenMiddleware::class,
         "check.role" => \App\Http\Middleware\RoleMiddleware::class,
         "role" => \App\Http\Middleware\CheckRoleMiddleware::class,

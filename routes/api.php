@@ -80,7 +80,7 @@ Route::prefix('patients')->group(function () {
 });
 
 // Caregivers
-Route::prefix('caregivers')->group(function () {
+Route::prefix('caregivers')->middleware("check.accept")->group(function () {
     Route::post('register', [App\Http\Controllers\Api\CaregiverController::class, 'register']);
     Route::post('login', [App\Http\Controllers\Api\CaregiverController::class, 'login']);
     

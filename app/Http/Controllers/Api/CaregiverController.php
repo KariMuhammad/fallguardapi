@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CaregiverResource;
 use App\Models\Caregiver;
 use App\Models\User;
+use App\Notifications\EmailVerificationNotification;
 use App\Rules\GenderValidateRule;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Http\Request;
 
 class CaregiverController extends Controller
@@ -15,6 +17,7 @@ class CaregiverController extends Controller
     public function __construct(){
         $this->middleware('role:caregiver', ['except' => ['register', 'login']]);    
         $this->middleware('check.token:Caregiver', ['only' => ['register', 'login']]);
+        $this->middleware('verified', ['except' => ['register']]);
     }
 
     // ============================= Caregiver =============================
@@ -48,19 +51,32 @@ class CaregiverController extends Controller
             $caregiver->photo = $imageUrl;
         }
 
-        return response()->json(new CaregiverResource($caregiver), 201);
+        $caregiver->password = \Hash::make($request->password);
+        // $caregiver->save();
+
+        // Notify the caregiver to verify their email
+        $caregiver->notify(new EmailVerificationNotification());
+
+        return response()->json([
+            "message" => "Caregiver registered successfully. Please verify your email.",
+            "data" => new CaregiverResource($caregiver)
+        ], 201);
     }
 
     public function login(Request $request) {
-        // Login Caregiver
+        
+        // Login Caregiver - Validate request
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
             'device_name' => 'required|string'
         ]);
 
+
+        // Check if the caregiver exists
         $caregiver = Caregiver::where('email', $request->email)->first();
 
+        // Check if the caregiver exists and the password is correct
         if (!$caregiver || !\Hash::check($request->password, $caregiver->password)) {
             return response()->json([
                 "errors" => [
@@ -68,6 +84,17 @@ class CaregiverController extends Controller
                 ]
             ], 401);
         }
+
+        // Check if the caregiver has verified their email
+        if ($caregiver->email_verified_at === null) {
+            return response()->json([
+                "errors" => [
+                    'message' => 'Please verify your email.'
+                ]
+            ], 401);
+        }
+
+        // Create token
         $token = $caregiver->createToken($request->device_name, ['*'])->plainTextToken;
 
         return response()->json([
