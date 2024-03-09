@@ -73,7 +73,7 @@ class Caregiver extends Authenticatable
             "gender" => ["required", new GenderValidateRule],
             "country" => "sometimes|required|string|max:255",
             'address' => 'sometimes|required|string|max:255',
-            'photo' => 'sometimes|required|file|max:255',
+            'photo' => 'sometimes|required|file',
         ];
     }
 }

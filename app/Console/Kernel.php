@@ -13,7 +13,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
-        $schedule->command('otp:clear')->everyTenMinutes();
+        $schedule->command('otp:clear')->daily();
+        $schedule->command('app:delete-unverified-users')->daily();
     }
 
     /**

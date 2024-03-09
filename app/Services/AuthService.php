@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Contracts\AuthenticationInterface;
 use App\Notifications\EmailVerificationNotification;
 use App\Notifications\ResetPasswordNotification;
+use Ichtrojan\Otp\Otp;
 use Illuminate\Http\Request;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -31,11 +32,10 @@ class AuthService implements AuthenticationInterface {
         }
 
         $User->password = \Hash::make($request->password);
-        // $caregiver->save();
+        $User->save();
 
         // Notify the caregiver to verify their email
-        // $User->notify(new EmailVerificationNotification());
-        // return response()->json("Registered successfully. Please verify your email.", 201);
+        $User->notify(new EmailVerificationNotification());
         $data = $User->toArray();
         
         return response()->json([
@@ -88,12 +88,21 @@ class AuthService implements AuthenticationInterface {
 
         $request->validate([
             "email" => "required|email|exists:{$UserTable},email",
-            "otp" => "required|numeric|max:6"
+            "otp" => "required|numeric|max:4"
         ]);
-
 
         // user owns the email
         $user = DB::table($UserTable)->where('email', $request->email)->first();
+        
+        try {
+            (new Otp)->validate($request->email, $request->otp);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status_message" => "error",
+                "status_code" => 400,
+                'message' => 'Invalid/Expired OTP, please resend another one.',
+            ]);
+        }
 
         $user->email_verified_at = now();
         $user->save();
@@ -132,6 +141,15 @@ class AuthService implements AuthenticationInterface {
         ]);
 
         $user = DB::table($UserTable)->where('email', $request->email)->first();
+        
+        try {
+            (new Otp)->validate($request->email, $request->otp);
+        } catch (\Exception $e) {
+            return response()->json([
+                "message" => "Invalid/Expired OTP, please resend another one."
+            ]);
+        }
+
         $user->password = \Hash::make($request->password);
         $user->save();
 
@@ -147,6 +165,28 @@ class AuthService implements AuthenticationInterface {
 
         return response()->json([
             "message" => "Logged out"
+        ]);
+    }
+
+    public function resendOtp(Request $request) {
+        $User = $this->user;
+        $UserTable = $User->getTable();
+
+        $request->validate([
+            "email" => "required|email|exists:{$UserTable},email",
+            "type" => "required|string|in:reset-password,verify-email"
+        ]);
+
+        $user = DB::table($UserTable)->where('email', $request->email)->first();
+
+        if ($request->type == "reset-password") {
+            $user->notify(new ResetPasswordNotification());
+        }else {
+            $user->notify(new EmailVerificationNotification());
+        }
+
+        return response()->json([
+            "message" => "OTP sent to your email."
         ]);
     }
 
