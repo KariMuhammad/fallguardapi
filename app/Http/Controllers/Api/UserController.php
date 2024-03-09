@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+
 use App\Http\Resources\User\UserCollection;
 use App\Http\Resources\User\UserResource;
 use App\Models\User;
+
 use App\Services\AuthService;
 use Illuminate\Http\Request;
 
@@ -53,6 +55,26 @@ class UserController extends Controller
     public function logout(Request $request)
     {
         return $this->authService->logout($request);
+    }
+
+    public function verifyEmail(Request $request)
+    {
+        return $this->authService->verifyEmail($request);
+    }
+
+    public function resendOtp(Request $request)
+    {
+        return $this->authService->resendOtp($request);
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        return $this->authService->forgotPassword($request);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        return $this->authService->resetPassword($request);
     }
 
     /**

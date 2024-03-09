@@ -2,8 +2,7 @@
 
 namespace App\Models;
 
-// use App\Http\Resources\Caregiver\CaregiverResource;
-use App\Http\Resources\CaregiverResource;
+use App\Http\Resources\Caregiver\CaregiverResource;
 use App\Rules\GenderValidateRule;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;

@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Contracts\AuthenticationInterface;
+
 use App\Notifications\EmailVerificationNotification;
 use App\Notifications\ResetPasswordNotification;
+
 use Ichtrojan\Otp\Otp;
 use Illuminate\Http\Request;
 
@@ -14,17 +16,20 @@ use Illuminate\Support\Facades\DB;
 
 class AuthService implements AuthenticationInterface {
     private $user;
+    private $model;
+
 
     // TODO: prefered to accept the class name as a string
     public function __construct(Authenticatable $user) {
         $this->user = $user;
+        $this->model = get_class($user);
     }
 
-    public function register(Request $request) {
-        $request->validate($this->user->validators());
+    public function register(Request $request) {        
+        $request->validate($this->model::validators());
 
         // $uploadedFileUrl = Cloudinary::upload($request->file('file')->getRealPath())->getSecurePath();
-        $User = $this->user::make($request->except('photo'));
+        $User = $this->model::make($request->except('photo')); // make:: return a new instance of the model
 
         if ($request->hasFile('photo')) {
             $imageUrl = Cloudinary::upload($request->file('photo')->getRealPath())->getSecurePath();
@@ -40,6 +45,7 @@ class AuthService implements AuthenticationInterface {
         
         return response()->json([
             "message" => "{$this->user->role} registered successfully. Please verify your email.",
+            "email" => $User->email,
             "data" => $data
         ], 201);
     }
@@ -52,7 +58,7 @@ class AuthService implements AuthenticationInterface {
         ]);
 
         // Check if the caregiver exists
-        $User = $this->user::where('email', $request->email)->first();
+        $User = $this->model::where('email', $request->email)->first();
 
         // Check if the caregiver exists and the password is correct
         if (!$User || !\Hash::check($request->password, $User->password)) {
@@ -82,30 +88,34 @@ class AuthService implements AuthenticationInterface {
     }
 
     public function verifyEmail(Request $request) {
-
-        $User = $this->user; // current user
+        // current user
+        $User = $this->user;
         $UserTable = $User->getTable();
 
         $request->validate([
             "email" => "required|email|exists:{$UserTable},email",
-            "otp" => "required|numeric|max:4"
+            "otp" => "required|string|max:4"
         ]);
 
-        // user owns the email
-        $user = DB::table($UserTable)->where('email', $request->email)->first();
+        // // user owns the email
+        // $user = DB::table($UserTable)->where('email', $request->email)->first();
         
         try {
             (new Otp)->validate($request->email, $request->otp);
         } catch (\Exception $e) {
             return response()->json([
-                "status_message" => "error",
-                "status_code" => 400,
-                'message' => 'Invalid/Expired OTP, please resend another one.',
+                "errors" => [
+                    "status_message" => "error",
+                    "status_code" => 400,
+                    'message' => 'Invalid/Expired OTP, please resend another one.',
+                ]
             ]);
         }
 
-        $user->email_verified_at = now();
-        $user->save();
+        $this->model::where('email', $request->email)->update(['email_verified_at' => now()]);
+
+        // $user->email_verified_at = now();
+        // $user->save(); #User is not an instance of the model to use `save` method
 
         return response()->json([
             "status_message" => "success",
@@ -122,7 +132,7 @@ class AuthService implements AuthenticationInterface {
             "email" => "required|email|exists:{$UserTable},email"
         ]);
 
-        $user = DB::table($UserTable)->where('email', $request->email)->first();
+        $user = $this->model::where('email', $request->email)->first();
         $user->notify(new ResetPasswordNotification());
 
         return response()->json([
@@ -136,17 +146,20 @@ class AuthService implements AuthenticationInterface {
 
         $request->validate([
             "email" => "required|email|exists:{$UserTable},email",
-            "otp" => "required|numeric|max:6",
+            "otp" => "required|string|max:6",
             "password" => "required|string|confirmed"
         ]);
 
-        $user = DB::table($UserTable)->where('email', $request->email)->first();
-        
+        $user = $this->model::where('email', $request->email)->first();
+        // Is OTP owned by the user? validate
+
         try {
             (new Otp)->validate($request->email, $request->otp);
         } catch (\Exception $e) {
             return response()->json([
-                "message" => "Invalid/Expired OTP, please resend another one."
+                "errors" => [
+                    "message" => "Invalid/Expired OTP, please resend another one."
+                ]
             ]);
         }
 

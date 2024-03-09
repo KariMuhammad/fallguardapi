@@ -1,5 +1,3 @@
-{{-- Reset Password --}}
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -27,7 +25,7 @@
 </head>
 
 <body>
-    <h3>Hi {{ user->$name }},</h3>
+    <h3>Hi {{ $user->name }},</h3>
     <h1>Reset Password</h1>
     <p>Use the following OTP code to reset your password: <strong class="otp">{{ $otp }}</strong></p>
 

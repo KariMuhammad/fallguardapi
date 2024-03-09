@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\CaregiverResource;
+use Illuminate\Http\Request;
+
+use App\Http\Resources\Caregiver\CaregiverResource;
 use App\Models\Caregiver;
 use App\Models\User;
-use App\Services\AuthService;
+
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
-use Illuminate\Http\Request;
+
+use App\Services\AuthService;
 
 class CaregiverController extends Controller
 {
@@ -16,9 +19,9 @@ class CaregiverController extends Controller
     private $authService;
 
     public function __construct(){
-        $this->middleware('role:caregiver', ['except' => ['register', 'login']]);    
+        $this->middleware('role:caregiver', ['except' => ['register', 'login', 'verifyEmail', 'resendOtp', 'forgotPassword', 'resetPassword']]);    
         $this->middleware('check.token:Caregiver', ['only' => ['register', 'login']]);
-        $this->middleware('verified', ['except' => ['register']]);
+        $this->middleware('verified', ['except' => ['register', 'login', 'verifyEmail', 'resendOtp', 'forgotPassword', 'resetPassword']]);
 
         // $this->authService = new AuthService(Caregiver::class);
         $this->authService = new AuthService(new Caregiver());
@@ -46,6 +49,26 @@ class CaregiverController extends Controller
     public function logout(Request $request)
     {
         return $this->authService->logout($request);
+    }
+
+    public function verifyEmail(Request $request)
+    {
+        return $this->authService->verifyEmail($request);
+    }
+
+    public function resendOtp(Request $request)
+    {
+        return $this->authService->resendOtp($request);
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        return $this->authService->forgotPassword($request);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        return $this->authService->resetPassword($request);
     }
 
     public function me(Request $request)

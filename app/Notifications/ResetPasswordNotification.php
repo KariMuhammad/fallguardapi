@@ -39,10 +39,11 @@ class ResetPasswordNotification extends Notification
         $otp = $this->otp->generate($notifiable->email, "numeric", 4, 10);
         return (new MailMessage)
                     ->view(
-                        'emails.reset-password',
+                        'vendor.notifications.reset-password',
                         [
-                            'otp' => $otp,
-                            'user' => $notifiable
+                            'otp' => $otp->token,
+                            'user' => $notifiable,
+                            "logo" => "https://res.cloudinary.com/dpr9selqa/image/upload/v1709916877/ivf95hxdxfiov8ykmvqt.png",
                         ]
                     );
     }
