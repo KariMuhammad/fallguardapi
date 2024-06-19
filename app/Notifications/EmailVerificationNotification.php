@@ -36,7 +36,7 @@ class EmailVerificationNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $otp = $this->otp->generate($notifiable->email, "numeric", 4, 10);
+        $otp = $this->otp->generate($notifiable->email, "numeric", 4, 5); // 5 minutes
         return (new MailMessage)
                     ->view('vendor.notifications.email', [
                         'otp' => $otp->token, 

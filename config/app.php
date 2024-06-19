@@ -164,6 +164,9 @@ return [
          * Application Service Providers...
          */
         App\Providers\AppServiceProvider::class,
+        // JWT
+        // Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
+        // Auth
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
@@ -186,7 +189,12 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
+        
+        // OTP
         "Otp" => Ichtrojan\Otp\Otp::class,
+        // JWT
+        // "JWTAuth" => Tymon\JWTAuth\Facades\JWTAuth::class,
+        // "JWTFactory" => Tymon\JWTAuth\Facades\JWTFactory::class,
     ])->toArray(),
 
 ];

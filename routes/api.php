@@ -21,7 +21,6 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('check.accept')->group(function () {
     //======================= Authentication =======================
     Route::middleware('guest:sanctum')
-        ->prefix('auth')
         ->group(function () {
             // Caregivers
             Route::prefix('caregivers')->group(function () {
@@ -30,7 +29,7 @@ Route::middleware('check.accept')->group(function () {
                 // Login a user
                 Route::post('login', [\App\Http\Controllers\Api\CaregiverController::class, 'login']);
                 // Logout a user
-                Route::post('logout', [\App\Http\Controllers\Api\CaregiverController::class, 'logout']);
+                Route::withoutMiddleware('guest:sanctum')->middleware("auth:sanctum")->post('logout', [\App\Http\Controllers\Api\CaregiverController::class, 'logout']);
 
                 // Verify Email
                 Route::post('verify-email', [\App\Http\Controllers\Api\CaregiverController::class, 'verifyEmail']);
@@ -48,7 +47,7 @@ Route::middleware('check.accept')->group(function () {
                 // Login a user
                 Route::post('login', [\App\Http\Controllers\Api\UserController::class, 'login']);
                 // Logout a user
-                Route::post('logout', [\App\Http\Controllers\Api\UserController::class, 'logout']);
+                Route::withoutMiddleware('guest:sanctum')->middleware('auth:sanctum')->post('logout', [\App\Http\Controllers\Api\UserController::class, 'logout']);
                 
                 // Verify Email
                 Route::post('verify-email', [\App\Http\Controllers\Api\UserController::class, 'verifyEmail']);
@@ -81,13 +80,16 @@ Route::middleware('check.accept')->group(function () {
             Route::post('unfollow/{id}', [App\Http\Controllers\Api\CaregiverController::class, 'unfollow']);
         });
 
-        Route::middleware(['check.token'])->post('auth/logout', [\App\Services\AuthService::class, 'logout']);
-
+        // Logout
+        Route::post('auth/logout', [\App\Services\AuthService::class, 'logout']);
         // Emergency Contacts
         Route::apiResource('emergency-contacts', EmergencyContactController::class);
         // Falls
         Route::apiResource('falls', FallController::class);
         Route::get('falls/{id}/user', [FallController::class, 'user']);
+
+        // Chat
+        // Route::apiResource('chats', \App\Http\Controllers\Api\ChatController::class);
     });
 
     //======================= Patients =======================

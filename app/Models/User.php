@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Http\Resources\User\UserResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -86,4 +87,9 @@ class User extends Authenticatable
             'photo' => 'sometimes|required|file|max:255',
         ];
     }
+
+
+    public function chats(): HasMany {
+        return $this->hasMany(Chat::class, "created_by");
+    }// sql: select * from chats where created_by = $this->id
 }

@@ -36,7 +36,7 @@ class ResetPasswordNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $otp = $this->otp->generate($notifiable->email, "numeric", 4, 10);
+        $otp = $this->otp->generate($notifiable->email, "numeric", 4, 5);
         return (new MailMessage)
                     ->view(
                         'vendor.notifications.reset-password',
