@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\PushNotificationEvent;
 use App\Http\Controllers\Controller;
 use App\Models\Fall;
-use Illuminate\Http\Request;
+use App\Notifications\FallDetectNotification;
+use App\Notifications\FollowNotification;
+use Illuminate\Http\Request; 
+
+use Mastani\GoogleStaticMap\GoogleStaticMap as StaticMap;
+
 
 class FallController extends Controller
 {
@@ -39,9 +45,24 @@ class FallController extends Controller
             "severity" => "required|string|in:danger,info,ok",
         ]);
 
+        $map = new StaticMap();
+        $map->setCenter("{$request->latitude},{$request->longitude}");
+        $map->setZoom(15);
+        $map->setSize(640, 480);
+
+        // Add a marker (optional)
+        $map->addMarker($request->latitude, $request->longitude, color: 'red');
+
+        $imageUrl = $map->make();
+
+        // Push Fall Detect Notification Event
+        event(new FallDetectNotification($request->user()));
+        event(new FollowNotification("He is Following you."));
+        
         return Fall::create([
             ...$request->all(),
             "user_id" => $request->user()->id,
+            "location" => $imageUrl
         ]);
     }
 
@@ -91,3 +112,5 @@ class FallController extends Controller
         ]);
     }
 }
+
+// 

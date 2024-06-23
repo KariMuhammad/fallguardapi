@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\EmergencyContactController;
 use App\Http\Controllers\Api\FallController;
 
@@ -57,6 +58,15 @@ Route::middleware('check.accept')->group(function () {
                 Route::post('forgot-password', [\App\Http\Controllers\Api\UserController::class, 'forgotPassword']);
                 Route::post('reset-password', [\App\Http\Controllers\Api\UserController::class, 'resetPassword']);
             });
+
+            // Social Auth
+            Route::prefix('auth')->group(function() {
+                Route::get('google', [\App\Http\Controllers\Api\AuthController::class, 'redirectToGoogle']);
+                Route::get('google/callback', [\App\Http\Controllers\Api\AuthController::class, 'handleGoogleCallback']);
+            });
+
+            // Search
+            Route::get('search', [App\Http\Controllers\Api\SearchController::class, 'search']);
         });
 
     // ======================= Shared Routes ===================
@@ -74,6 +84,9 @@ Route::middleware('check.accept')->group(function () {
                 ]);
             });
 
+            // Chats
+            Route::get('/chats', [ChatController::class, 'latestChats']);
+
             // Follow-ups
             // Caregiver can follow many patients, but patients cannot follow anyone
             Route::post('follow/{id}', [App\Http\Controllers\Api\CaregiverController::class, 'follow']);
@@ -89,7 +102,16 @@ Route::middleware('check.accept')->group(function () {
         Route::get('falls/{id}/user', [FallController::class, 'user']);
 
         // Chat
-        // Route::apiResource('chats', \App\Http\Controllers\Api\ChatController::class);
+        Route::group([
+            'prefix' => 'chat',
+            'middleware' => 'auth:sanctum',
+        ], function() {
+            Route::get('/{other_id}', [ChatController::class, 'getMessagesOfOtherUser']);
+            Route::post('/{receiver_id}', [ChatController::class, 'sendMessage']);
+
+            // Route::get('/{receiver_id}/unread', [ChatController::class, 'getUnreadMessages']);
+            // Route::post('/{receiver_id}/read', [ChatController::class, 'markAsRead']);
+        });
     });
 
     //======================= Patients =======================
@@ -119,6 +141,9 @@ Route::middleware('check.accept')->group(function () {
                 Route::get('/', [App\Http\Controllers\Api\UserController::class, 'me']); // Get the current user
                 Route::post('logout', [App\Http\Controllers\Api\UserController::class, 'logout']); // Logout a user
             });
+
+            Route::post('follow/{id}', [App\Http\Controllers\Api\UserController::class, 'follow']);
+            Route::post('unfollow/{id}', [App\Http\Controllers\Api\UserController::class, 'unfollow']);
         });
     });
 

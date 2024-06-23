@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contracts\AuthenticationInterface;
 
+use App\Models\Caregiver;
 use App\Notifications\EmailVerificationNotification;
 use App\Notifications\ResetPasswordNotification;
 
@@ -203,9 +204,7 @@ class AuthService implements AuthenticationInterface
             'type' => 'required|string|in:reset-password,verify-email',
         ]);
 
-        $user = DB::table($UserTable)
-            ->where('email', $request->email)
-            ->first();
+        $user = $this->model::where('email', $request->email)->first();
 
         if ($request->type == 'reset-password') {
             $user->notify(new ResetPasswordNotification());

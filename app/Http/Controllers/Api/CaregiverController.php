@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Notifications\FollowNotification;
 use Illuminate\Http\Request;
 
 use App\Http\Resources\Caregiver\CaregiverResource;
@@ -226,6 +227,9 @@ class CaregiverController extends Controller
         }
 
         $request->user()->patients()->attach($patient);
+        
+        // Follow Notification
+        // $patient->notify(new FollowNotification("Caregiver " . $request->user()->name . " is now following you"));
 
         return response()->json([
             "message" => "Patient followed successfully"
@@ -256,7 +260,9 @@ class CaregiverController extends Controller
         }
             
         $request->user()->patients()->detach($patient);
-
+        // Unfollow Notification
+        // $patient->notify(new FollowNotification("Caregiver " . $request->user()->name . " is now unfollowing you"));
+        
         return response()->json([
             "message" => "Patient unfollowed successfully"
         ]);

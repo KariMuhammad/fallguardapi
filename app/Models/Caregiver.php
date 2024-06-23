@@ -75,4 +75,14 @@ class Caregiver extends Authenticatable
             'photo' => 'sometimes|required|file',
         ];
     }
+
+    // public function sentMessages()
+    // {
+    //     return $this->morphMany(Message::class, 'sender');
+    // }
+
+    // public function receivedMessages()
+    // {
+    //     return $this->morphMany(Message::class, 'receiver');
+    // }
 }

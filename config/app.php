@@ -174,6 +174,9 @@ return [
 
         // OTP
         Ichtrojan\Otp\OtpServiceProvider::class,
+
+        // Socialite
+        Laravel\Socialite\SocialiteServiceProvider::class
     ])->toArray(),
 
     /*
@@ -192,6 +195,10 @@ return [
         
         // OTP
         "Otp" => Ichtrojan\Otp\Otp::class,
+
+        // Socialite
+        'Socialite' => Laravel\Socialite\Facades\Socialite::class
+
         // JWT
         // "JWTAuth" => Tymon\JWTAuth\Facades\JWTAuth::class,
         // "JWTFactory" => Tymon\JWTAuth\Facades\JWTFactory::class,

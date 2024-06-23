@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Resources\User\UserCollection;
 use App\Http\Resources\User\UserResource;
+use App\Models\Caregiver;
 use App\Models\User;
 
+use App\Notifications\FollowNotification;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
 
@@ -168,4 +170,63 @@ class UserController extends Controller
             "data" => new UserResource($user)
         ]);
     }
+
+    // Follow Caregiver 
+    // public function follow(Request $request, $id)
+    // {
+    //     $caregiver = Caregiver::find($id);
+
+    //     if (!$caregiver) {
+    //         return response()->json([
+    //             "errors" => [
+    //                 "message" => "Caregiver not found"
+    //             ]
+    //         ], 404);
+    //     }
+    //     // Check if Caregiver already following the patient
+    //     if ($request->user()->caregivers()->find($id)) {
+    //         return response()->json([
+    //             "errors" => [
+    //                 "message" => "Caregiver already following the patient"
+    //             ]
+    //         ], 400);
+    //     }
+
+    //     $request->user()->caregivers()->attach($caregiver);
+    //     // Follow Notification
+    //     $caregiver->notify(new FollowNotification("Patient " . $request->user()->name . " is now following you"));
+
+    //     return response()->json([
+    //         "message" => "Caregiver followed successfully"
+    //     ]);
+    // }
+
+
+    // public function unfollow(Request $request, $id)
+    // {
+    //     $caregiver = Caregiver::find($id);
+
+    //     if (!$caregiver) {
+    //         return response()->json([
+    //             "errors" => [
+    //                 "message" => "Caregiver not found"
+    //             ]
+    //         ], 404);
+    //     }
+
+    //     // Check if paitnet already unfollowing the caregiver
+    //     if(!$request->user()->caregiver()->find($id)) {
+    //         return response()->json([
+    //             "errors" => [
+    //                 "message" => "Caregiver already unfollowing the patient"
+    //             ]
+    //         ], 400);
+    //     }
+            
+    //     $request->user()->patients()->detach($patient);
+
+    //     return response()->json([
+    //         "message" => "Patient unfollowed successfully"
+    //     ]);
+    // }
 }
